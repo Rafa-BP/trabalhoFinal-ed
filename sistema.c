@@ -73,6 +73,18 @@ NodeLivro *achaLivro(NodeLivro *raiz, int id) {
 	return raiz;
 }
 
+void trocaLivro(NodeLivro *raiz, Livro *livro) {
+	if (raiz == NULL) {
+		printf("\nLivro não encontrado.");
+		return;
+	}
+	if (raiz->valor->id == livro->id) {
+		raiz->valor = livro;
+	}
+	if (raiz->valor->id > livro->id) trocaLivro(raiz->right, livro);
+	else trocaLivro(raiz->left, livro);
+}
+
 // Funções para Arvore de Usuarios
 
 NodeUsuario *iniciaNodeUsuario(Usuario *usuario) {
@@ -93,13 +105,34 @@ NodeUsuario *adicionaUsuario(NodeUsuario *raiz, NodeUsuario *novo) {
 	return raiz;
 }
 
-NodeUsuario *achaUsuario(NodeUsuario *raiz, char* nome) {
+NodeUsuario *achaUsuarioNome(NodeUsuario *raiz, char* nome) {
 	if (raiz == NULL || strcmp(raiz->valor->nome, nome) == 0) {
 		return raiz;
 	}
-	if (strcmp(raiz->valor->nome, nome) >= 0) return achaUsuario(raiz->right, nome);
-	else return achaUsuario(raiz->left, nome);
+	if (strcmp(raiz->valor->nome, nome) >= 0) return achaUsuarioNome(raiz->right, nome);
+	else return achaUsuarioNome(raiz->left, nome);
 	return raiz;
+}
+
+NodeUsuario *achaUsuarioEmail(NodeUsuario *raiz, char* email) {
+	if (raiz == NULL || strcmp(raiz->valor->email, email) == 0) {
+		return raiz;
+	}
+	if (strcmp(raiz->valor->email, email) >= 0) return achaUsuarioEmail(raiz->right, email);
+	else return achaUsuarioEmail(raiz->left, email);
+	return raiz;
+}
+
+void trocaUsuario(NodeUsuario *raiz, Usuario *usuario) {
+	if (raiz == NULL) {
+		printf("\nUsuario não encontrado.");
+		return;
+	}
+	if (strcmp(raiz->valor->email, usuario->email) == 0) {
+		raiz->valor = usuario;
+	}
+	if (strcmp(raiz->valor->email, usuario->email) >= 0) trocaUsuario(raiz->right, usuario);
+	else trocaUsuario(raiz->left, usuario);
 }
 
 // Main
