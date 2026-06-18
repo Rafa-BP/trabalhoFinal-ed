@@ -5,17 +5,17 @@
 // TADs principais
 
 typedef struct user {
-	char *nome;
-	char *email;
+	char nome[30];
+	char email[50];
 } Usuario; 
 
 typedef struct livr {
 	int id;
-	char *titulo;
-	char *autor;
-	int dataPub;
+	char titulo[30];
+	char autor[30];
+	int anoPubli;
 	int status;
-	char *email;
+	char email[50];
 } Livro; 
 
 // TADs para Estrutura de Dados
@@ -45,7 +45,11 @@ typedef struct nodo {
 void printaLista(NodeLista *f) {
 	NodeLista *aux = f;
 	while (aux != NULL) {
-		printf("%s\n", f->valor->autor);
+		char* status = "Emprestado";
+		if (aux->valor->status == 0) {
+			status = "Disponivel";
+		}
+		printf("\nTitulo: %s\nAutor: %s\nAno de Publicação: %d\nStatus: %s\nEmail: %s\n\n", aux->valor->titulo, aux->valor->autor, aux->valor->anoPubli, status, aux->valor->email);
 		aux = aux->next;
 	}
 }
@@ -105,6 +109,26 @@ NodeLista *achaLivroAutor(NodeLivro *raiz, char *autor, NodeLista *first) {
 		}
 	}
 	first = achaLivroAutor(raiz->right, autor, first);
+	return first;
+}
+
+NodeLista *achaLivroEmail(NodeLivro *raiz, char *email, NodeLista *first) {
+	if (raiz == NULL) return first;
+	first = achaLivroAutor(raiz->left, email, first);
+	if (strcmp(raiz->valor->email, email) == 0) {
+		NodeLista *novo = (NodeLista *)malloc(sizeof(NodeLista));
+		novo->valor = raiz->valor;
+		novo->next = NULL;
+		if (first == NULL) {
+			first = novo;
+		} else {
+			NodeLista *aux = NULL;
+			// Percorre lista ate achar o ultimo nodo
+			for (aux=first;aux->next!=NULL;aux=aux->next);
+			aux->next = novo;
+		}
+	}
+	first = achaLivroAutor(raiz->right, email, first);
 	return first;
 }
 
@@ -173,46 +197,242 @@ void trocaUsuario(NodeUsuario *raiz, Usuario *usuario) {
 	else trocaUsuario(raiz->left, usuario);
 }
 
+// Funções da biblioteca 
+
+void cadastro(Arvore *arvore) {
+	int seletor = 1;
+
+	while (seletor != 0) {
+		// Comando para limpar console
+		system("clear");
+		printf("Selecione uma das seguintes opções: \n1. Livros \n2. Usuarios \n0.Sair \n\nDigite sua escolha: ");
+		scanf("%d", &seletor);	
+		
+		switch(seletor) {
+			case 1:
+				// Comando para limpar console
+				system("clear");
+				
+				// Livro
+				printf("Digite as informações para o livro: \n");
+				
+				Livro *novoL = (Livro *)malloc(sizeof(Livro));
+				
+				int id = 1;
+				printf("Numero de identificação: ");
+				scanf("%d", &id);
+				while (achaLivro(arvore->raizLivro, id) != NULL) {
+					printf("Numero de identificação já existente, favor digitar outro numero: ");
+					scanf("%d", &id);
+				}
+				novoL->id = id;
+				
+				char titulo[30];
+				printf("Titulo: ");
+				scanf("%s", titulo);
+				strcpy(novoL->titulo, titulo);
+				
+				char autor[30];
+				printf("Autor: ");
+				scanf("%s", autor);
+				strcpy(novoL->autor, autor);
+				
+				int anoPubli = 0;
+				printf("Ano de publicação: ");
+				scanf("%d", &anoPubli);
+				novoL->anoPubli = anoPubli;
+				
+				novoL->status = 0;
+				
+				arvore->raizLivro = adicionaLivro(arvore->raizLivro, iniciaNodeLivro(novoL));
+				
+				break;
+			case 2:
+				// Comando para limpar console
+				system("clear");
+				
+				// Usuario
+				
+				// Livro
+				printf("Digite as informações para o usuario: \n");
+				
+				Usuario *novoU = (Usuario *)malloc(sizeof(Usuario));
+				 
+				char nome[30];
+				printf("Nome: ");
+				scanf("%s", nome);
+				strcpy(novoU->nome, nome);
+				
+				char email[50];
+				printf("Email: ");
+				scanf("%s", email);
+				strcpy(novoU->email, email);
+				
+				arvore->raizUsuario = adicionaUsuario(arvore->raizUsuario, iniciaNodeUsuario(novoU));
+				break;
+		}	
+	}
+}
+
+void consulta(Arvore *arvore) {
+	int seletor = 1;
+
+	while (seletor != 0) {
+		// Comando para limpar console
+		system("clear");
+		printf("Selecione uma das seguintes opções: \n1. Livros \n2. Usuarios \n3. Emprestimos \n0. Sair \n\nDigite sua escolha: ");
+		scanf("%d", &seletor);	
+		
+		switch(seletor) {
+			case 1:
+				// Comando para limpar console
+				system("clear");
+				
+				// Livro
+				int seletorLivro = 1;
+				
+				while (seletorLivro != 0) {
+					printf("Gostaria de consultar o livro por: \n1. Código \n2. Autor \n0. Sair\n\nDigite sua escolha: ");
+					scanf("%d", &seletorLivro);	
+					switch(seletorLivro) {
+						case 1:
+							// Código
+							int idProcura;
+							printf("Digite o Id do livro que gostaria de procurar: ");
+							scanf("%d", &idProcura);
+							
+							NodeLivro *livro = achaLivro(arvore->raizLivro, idProcura);
+							
+							if (livro != NULL) {
+								char* status = "Emprestado";
+								if (livro->valor->status == 0) {
+									status = "Disponivel";
+								}
+								printf("Livro encontrado! \nTitulo: %s\nAutor: %s\nAno de Publicação: %d\nStatus: %s\nEmail: %s\n\n", livro->valor->titulo, livro->valor->autor, livro->valor->anoPubli, status, livro->valor->email);
+							} else {
+								printf("Livro não encontrado para este id.\n\n");
+							}
+							
+							break;
+						case 2:
+							char autor[30];
+							printf("Digite o autor dos livros que gostaria de procurar: ");
+							scanf("%s", autor);
+							
+							NodeLista *lista = achaLivroAutor(arvore->raizLivro, autor, NULL);
+							
+							if (lista != NULL) {
+								printf("Livros encontrados:\n");
+								printaLista(lista);
+							} else {
+								printf("Nenhum livro encontrado para este autor.\n\n");
+							}
+							break;
+					}
+				}
+				
+				break;
+			case 2:
+				// Comando para limpar console
+				system("clear");
+			
+				// Usuario
+				int seletorUsuario = 1;
+				
+				while (seletorUsuario != 0) {
+					printf("Gostaria de consultar os usuarios por: \n1. Nome \n2. Email \n0. Sair\n\nDigite sua escolha: ");
+					scanf("%d", &seletorUsuario);	
+					switch(seletorUsuario) {
+						case 1:
+							// Nome
+							char nome[30];
+							printf("Digite o nome do usuario que gostaria de consultar: ");
+							scanf("%s", nome);
+							
+							NodeUsuario *usuarioN = achaUsuarioNome(arvore->raizUsuario, nome);
+							
+							if (usuarioN != NULL) {
+								printf("Usuario encontrado! \nNome: %s\nEmail: %s\n\n", usuarioN->valor->nome, usuarioN->valor->email);
+							} else {
+								printf("Usuario não cadastrado neste nome.\n\n");
+							}
+							
+							break;
+						case 2:
+							// Email
+							char email[50];
+							printf("Digite o email do usuario que gostaria de consultar: ");
+							scanf("%s", email);
+							
+							NodeUsuario *usuarioE = achaUsuarioEmail(arvore->raizUsuario, email);
+							
+							if (usuarioE != NULL) {
+								printf("Usuario encontrado! \nNome: %s\nEmail: %s\n\n", usuarioE->valor->nome, usuarioE->valor->email);
+							} else {
+								printf("Usuario não cadastrado neste email.\n\n");
+							}
+					}
+				}
+				break;
+			case 3:
+				// Comando para limpar console
+				system("clear");
+			
+				// Emprestimo
+				char email[50];
+				printf("Digite o email do usuario que deseja ver os livros emprestados ao mesmo: ");
+				scanf("%s", email);
+
+				NodeLista *lista = achaLivroEmail(arvore->raizLivro, email, NULL);
+							
+				if (lista != NULL) {
+					printf("Livros encontrados:\n");
+					printaLista(lista);
+				} else {
+					printf("Nenhum livro emprestado a este usuario.\n\n");
+				}
+				break;
+		}	
+	}
+}
+
 // Main
 
 int main(void)
 {
 	Arvore *arvore = iniciaArvore();
 	
-	Livro *livro = (Livro *)malloc(sizeof(Livro));
-	livro->id = 1;
-	livro->autor = "Teste";
+	int seletor = 1;
 	
-	Livro *livro2 = (Livro *)malloc(sizeof(Livro));
-	livro2->id = 2;
-	livro2->autor = "Teste";
+	while (seletor != 0) {
+		// Comando para limpar console
+		system("clear");
+		printf("Selecione uma das seguintes opções: \n1. Cadastro \n2. Consulta \n3. Atualização \n4. Exclusão \n5. Emprestimo \n6. Devolução \n0.Sair \n\nDigite sua escolha: ");
+		scanf("%d", &seletor);
+		
+		switch(seletor) {
+			case 1:
+				cadastro(arvore);
+				break;
+			case 2:
+				consulta(arvore);
+				break;
+			case 3:
+				
+				break;
+			case 4:
+				
+				break;
+			case 5:
+				
+				break;
+			case 6:
+				
+				break;
+		}
+	}
 	
-	NodeLivro *novo = iniciaNodeLivro(livro);
-	NodeLivro *novo2 = iniciaNodeLivro(livro2);
-	
-	arvore->raizLivro = adicionaLivro(arvore->raizLivro, novo);
-	arvore->raizLivro = adicionaLivro(arvore->raizLivro, novo2);
-
-	printf("%p\n",achaLivro(arvore->raizLivro, 1));
-	printf("%p\n",achaLivro(arvore->raizLivro, 2));
-	
-	NodeLista *lista = achaLivroAutor(arvore->raizLivro, "Teste", NULL);
-	
-	printf("\n printando lista aqui \n");
-	
-	printaLista(lista);
-	
-	Livro *livro3 = (Livro *)malloc(sizeof(Livro));
-	livro3->id = 2;
-	livro3->autor = "Teste2";
-	
-	trocaLivro(arvore->raizLivro, livro3);
-	
-	NodeLista *lista2 = achaLivroAutor(arvore->raizLivro, "Teste2", NULL);
-	
-	printf("\n printando lista aqui \n");
-	
-	printaLista(lista2);
+	system("clear");
 	
 	return 0;
 }
