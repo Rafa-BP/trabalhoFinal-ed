@@ -83,7 +83,7 @@ NodeLivro *adicionaLivro(NodeLivro *raiz, NodeLivro *novo) {
 	return raiz;
 }
 
-NodeLivro *achaLivro(NodeLivro *raiz, int id) {
+ NodeLivro *achaLivro(NodeLivro *raiz, int id) {
 	if (raiz == NULL || raiz->valor->id == id) {
 		return raiz;
 	}
@@ -396,6 +396,84 @@ void consulta(Arvore *arvore) {
 	}
 }
 
+void atualiza(Arvore *arvore) {
+	int seletor = 1;
+	
+	while (seletor != 0) {
+		// Comando para limpar console
+		system("clear");
+		
+		printf("Selecione uma das seguintes opções: \n1. Livros \n2. Usuarios \n0. Sair \n\nDigite sua escolha: ");
+		scanf("%d", &seletor);
+		switch(seletor) {
+			case 1:
+				// Comando para limpar console
+				system("clear");
+					
+				int seletorLivro = 1;
+				
+				while (seletorLivro != 0) {
+					printf("O'que gostaria de atualizar? \n1. Titulo \n2. Autor \n3. Ano \n0. Sair \n\nDigite sua escolha: ");
+					scanf("%d", &seletorLivro);
+					
+					int id = 0;
+					printf("Digite o Id do livro que gostaria de atualizar: ");
+					scanf("%d", &id);
+					
+					NodeLivro *livro = achaLivro(arvore->raizLivro, id);
+					
+					if (livro == NULL) {
+						printf("Livro não encontrado.\n\n");
+						break;
+					}
+					
+					switch(seletorLivro) {
+						case 1:
+							char titulo[30];
+							printf("Digite o novo titulo: ");
+							scanf("%s", titulo);
+							strcpy(livro->valor->titulo, titulo);
+							break;
+						case 2:
+							char autor[30];
+							printf("Digite o novo autor: ");
+							scanf("%s", autor);
+							strcpy(livro->valor->autor, autor);
+							break;
+						case 3:
+							int anoPubli;
+							printf("Digite o novo ano de publicação: ");
+							scanf("%d", &anoPubli);
+							livro->valor->anoPubli = anoPubli;				
+							break;
+					}
+					trocaLivro(arvore->raizLivro, livro->valor);
+				}
+				break;
+			case 2:
+				char email[50];
+				printf("Digite o email do usuario que gostaria de alterar: ");
+				scanf("%s", email);
+				
+				NodeUsuario *usuario = achaUsuarioEmail(arvore->raizUsuario, email);
+				
+				if (usuario == NULL) {
+					printf("Usuario não encontrado.\n\n");
+					break;
+				}
+				
+				char nome[30];
+				printf("Digite o novo nome do usuario: ");
+				scanf("%s", nome);
+				strcpy(usuario->valor->nome, nome);
+				
+				trocaUsuario(arvore->raizUsuario, usuario->valor);
+				
+				break;
+		}
+	}
+}
+
 // Main
 
 int main(void)
@@ -407,7 +485,7 @@ int main(void)
 	while (seletor != 0) {
 		// Comando para limpar console
 		system("clear");
-		printf("Selecione uma das seguintes opções: \n1. Cadastro \n2. Consulta \n3. Atualização \n4. Exclusão \n5. Emprestimo \n6. Devolução \n0.Sair \n\nDigite sua escolha: ");
+		printf("Selecione uma das seguintes opções: \n1. Cadastro \n2. Consulta \n3. Atualização \n4. Exclusão \n5. Emprestimo \n6. Devolução \n0. Sair \n\nDigite sua escolha: ");
 		scanf("%d", &seletor);
 		
 		switch(seletor) {
@@ -418,7 +496,7 @@ int main(void)
 				consulta(arvore);
 				break;
 			case 3:
-				
+				atualiza(arvore);
 				break;
 			case 4:
 				
