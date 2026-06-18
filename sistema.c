@@ -43,9 +43,10 @@ typedef struct nodo {
 } NodeLista;
 
 void printaLista(NodeLista *f) {
-	if (f != NULL) {
+	NodeLista *aux = f;
+	while (aux != NULL) {
 		printf("%s\n", f->valor->autor);
-		printaLista(f->next);
+		aux = aux->next;
 	}
 }
 
@@ -88,9 +89,8 @@ NodeLivro *achaLivro(NodeLivro *raiz, int id) {
 }
 
 NodeLista *achaLivroAutor(NodeLivro *raiz, char *autor, NodeLista *first) {
-	printf("Nodo: %p\n", raiz);
 	if (raiz == NULL) return first;
-	achaLivroAutor(raiz->left, autor, first);
+	first = achaLivroAutor(raiz->left, autor, first);
 	if (strcmp(raiz->valor->autor, autor) == 0) {
 		NodeLista *novo = (NodeLista *)malloc(sizeof(NodeLista));
 		novo->valor = raiz->valor;
@@ -99,21 +99,25 @@ NodeLista *achaLivroAutor(NodeLivro *raiz, char *autor, NodeLista *first) {
 			first = novo;
 		} else {
 			NodeLista *aux = NULL;
+			// Percorre lista ate achar o ultimo nodo
 			for (aux=first;aux->next!=NULL;aux=aux->next);
 			aux->next = novo;
 		}
 	}
-	achaLivroAutor(raiz->right, autor, first);
+	first = achaLivroAutor(raiz->right, autor, first);
 	return first;
 }
 
 void trocaLivro(NodeLivro *raiz, Livro *livro) {
 	if (raiz == NULL) {
-		printf("\nLivro não encontrado.");
+		printf("\nLivro não encontrado.\n");
 		return;
 	}
 	if (raiz->valor->id == livro->id) {
+		Livro *aux = raiz->valor;
 		raiz->valor = livro;
+		free(aux);
+		return;
 	}
 	if (raiz->valor->id < livro->id) trocaLivro(raiz->right, livro);
 	else trocaLivro(raiz->left, livro);
@@ -192,13 +196,23 @@ int main(void)
 	printf("%p\n",achaLivro(arvore->raizLivro, 1));
 	printf("%p\n",achaLivro(arvore->raizLivro, 2));
 	
-	printf("\n arvore aqui \n\n");
-	
 	NodeLista *lista = achaLivroAutor(arvore->raizLivro, "Teste", NULL);
 	
-	printf("\n printando usuario aqui \n\n");
+	printf("\n printando lista aqui \n");
 	
 	printaLista(lista);
+	
+	Livro *livro3 = (Livro *)malloc(sizeof(Livro));
+	livro3->id = 2;
+	livro3->autor = "Teste2";
+	
+	trocaLivro(arvore->raizLivro, livro3);
+	
+	NodeLista *lista2 = achaLivroAutor(arvore->raizLivro, "Teste2", NULL);
+	
+	printf("\n printando lista aqui \n");
+	
+	printaLista(lista2);
 	
 	return 0;
 }
