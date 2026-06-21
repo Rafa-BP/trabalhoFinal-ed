@@ -472,7 +472,22 @@ void emprestimo(Arvore *arvore) {
 }
 
 void devolucao(Arvore *arvore) {
+	int id = 0;
 	
+	printf("Digite o Id do livro que sera devolvido: ");
+	scanf("%d", &id);
+	
+	NodeLivro *livro = achaLivro(arvore->raizLivro ,id);
+	
+	if (livro == NULL) {
+		printf("Livro não encontrado.");
+		return;
+	}
+	
+	strcpy(livro->valor->email, "");
+	livro->valor->status = 0;
+	
+	printf("Livro devolvido!\n\n");
 }
 
 // Main
